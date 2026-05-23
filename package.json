@@ -1,0 +1,112 @@
+{
+  "name": "deepseekcode",
+  "displayName": "DeepSeek Reasonix",
+  "description": "一键启动 DeepSeek Reasonix 终端，自动注入文件上下文。One-click launch Reasonix terminal with auto file context injection.",
+  "version": "2.0.0",
+  "publisher": "deepseekcode",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/deepseekcode-vscode.git"
+  },
+  "icon": "images/logo.png",
+  "galleryBanner": {
+    "color": "#1a1a2e",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=20"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "deepseekcode.openTerminal",
+        "title": "DeepSeek Reasonix: 打开终端",
+        "icon": {
+          "light": "images/button-light.svg",
+          "dark": "images/button-dark.svg"
+        }
+      },
+      {
+        "command": "deepseekcode.openNewTerminal",
+        "title": "DeepSeek Reasonix: 新建终端",
+        "icon": {
+          "light": "images/button-light.svg",
+          "dark": "images/button-dark.svg"
+        }
+      },
+      {
+        "command": "deepseekcode.addFileToTerminal",
+        "title": "DeepSeek Reasonix: 添加文件引用到终端"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "deepseekcode.openNewTerminal",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "deepseekcode.openTerminal",
+        "key": "ctrl+escape",
+        "mac": "cmd+escape",
+        "win": "ctrl+escape",
+        "linux": "ctrl+escape"
+      },
+      {
+        "command": "deepseekcode.openNewTerminal",
+        "key": "ctrl+shift+escape",
+        "mac": "cmd+shift+escape",
+        "win": "ctrl+shift+escape",
+        "linux": "ctrl+shift+escape"
+      },
+      {
+        "command": "deepseekcode.addFileToTerminal",
+        "key": "ctrl+alt+k",
+        "mac": "cmd+alt+k",
+        "win": "ctrl+alt+k",
+        "linux": "ctrl+alt+k"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "deepseekcode",
+          "title": "DeepSeek Reasonix",
+          "icon": "images/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "deepseekcode": [
+        {
+          "type": "webview",
+          "id": "deepseekcode.sidebar",
+          "name": "DeepSeek Reasonix"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.js --production",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production && npx @vscode/vsce package",
+    "publish": "node esbuild.js --production && npx @vscode/vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "22.x",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0"
+  }
+}
