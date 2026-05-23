@@ -1,7 +1,7 @@
 {
   "name": "deepseekcode",
-  "displayName": "DeepSeek Reasonix",
-  "description": "一键启动 DeepSeek Reasonix 终端，自动注入文件上下文。One-click launch Reasonix terminal with auto file context injection.",
+  "displayName": "DeepSeekCode",
+  "description": "一键启动 DeepSeekCode 终端，自动注入文件上下文。One-click launch DeepSeekCode terminal with auto file context injection.",
   "version": "2.0.0",
   "publisher": "deepseekcode",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "commands": [
       {
         "command": "deepseekcode.openTerminal",
-        "title": "DeepSeek Reasonix: 打开终端",
+        "title": "DeepSeekCode: 打开终端",
         "icon": {
           "light": "images/button-light.svg",
           "dark": "images/button-dark.svg"
@@ -35,7 +35,7 @@
       },
       {
         "command": "deepseekcode.openNewTerminal",
-        "title": "DeepSeek Reasonix: 新建终端",
+        "title": "DeepSeekCode: 新建终端",
         "icon": {
           "light": "images/button-light.svg",
           "dark": "images/button-dark.svg"
@@ -43,9 +43,19 @@
       },
       {
         "command": "deepseekcode.addFileToTerminal",
-        "title": "DeepSeek Reasonix: 添加文件引用到终端"
+        "title": "DeepSeekCode: 添加文件引用到终端"
       }
     ],
+    "configuration": {
+      "title": "DeepSeekCode",
+      "properties": {
+        "deepseekcode.launchCommand": {
+          "type": "string",
+          "default": "deepseekcode",
+          "description": "Command sent to the VS Code terminal when DeepSeekCode starts."
+        }
+      }
+    },
     "menus": {
       "editor/title": [
         {
@@ -81,7 +91,7 @@
       "activitybar": [
         {
           "id": "deepseekcode",
-          "title": "DeepSeek Reasonix",
+          "title": "DeepSeekCode",
           "icon": "images/icon.svg"
         }
       ]
@@ -91,7 +101,7 @@
         {
           "type": "webview",
           "id": "deepseekcode.sidebar",
-          "name": "DeepSeek Reasonix"
+          "name": "DeepSeekCode"
         }
       ]
     }

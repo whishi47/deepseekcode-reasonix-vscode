@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
 
 // ═══════════════════════════════════════════════════════════
-// DeepSeek Reasonix VS Code Extension
+// DeepSeekCode VS Code Extension
 // One-click terminal launch + auto file context injection.
 // Powered by Reasonix CLI (deepseekcode).
 // ═══════════════════════════════════════════════════════════
 
 const TERMINAL_NAME = "DeepSeek";
-const LAUNCH_COMMAND = "deepseekcode";
+const DEFAULT_LAUNCH_COMMAND = "deepseekcode";
 
 // ── Extension Lifecycle ────────────────────────────────────
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("[DeepSeek Reasonix] Extension activated");
+  console.log("[DeepSeekCode] Extension activated");
 
   // Command 1: Open or focus existing terminal
   const openTerminalCmd = vscode.commands.registerCommand(
@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
       await launchTerminal(context);
-    }
+    },
   );
 
   // Command 2: Always create a new terminal
@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
     "deepseekcode.openNewTerminal",
     async () => {
       await launchTerminal(context);
-    }
+    },
   );
 
   // Command 3: Inject current file reference into active terminal
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
     async () => {
       const fileRef = getActiveFileRef();
       if (!fileRef) {
-        vscode.window.showWarningMessage("[DeepSeek Reasonix] 没有活动的编辑器文件");
+        vscode.window.showWarningMessage("[DeepSeekCode] 没有活动的编辑器文件");
         return;
       }
 
@@ -54,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
           dsTerminal.show();
         } else {
           vscode.window.showInformationMessage(
-            "[DeepSeek Reasonix] 请先打开终端 (Ctrl+Escape)"
+            "[DeepSeekCode] 请先打开终端 (Ctrl+Escape)",
           );
         }
         return;
@@ -62,21 +62,21 @@ export function activate(context: vscode.ExtensionContext) {
 
       terminal.sendText(fileRef, false);
       terminal.show();
-    }
+    },
   );
 
   // Sidebar provider for activity bar icon
   const sidebarProvider = new SidebarProvider();
   const sidebarView = vscode.window.registerWebviewViewProvider(
     "deepseekcode.sidebar",
-    sidebarProvider
+    sidebarProvider,
   );
 
   context.subscriptions.push(
     openTerminalCmd,
     openNewTerminalCmd,
     addFileCmd,
-    sidebarView
+    sidebarView,
   );
 }
 
@@ -113,7 +113,7 @@ async function launchTerminal(context: vscode.ExtensionContext) {
   if (workspaceRoot) {
     terminal.sendText(`cd "${workspaceRoot}"`);
   }
-  terminal.sendText(LAUNCH_COMMAND);
+  terminal.sendText(getLaunchCommand());
 
   // Auto-inject current file context after giving Reasonix time to initialize
   const fileRef = getActiveFileRef();
@@ -123,6 +123,30 @@ async function launchTerminal(context: vscode.ExtensionContext) {
     await new Promise((resolve) => setTimeout(resolve, 2500));
     terminal.sendText(fileRef, false);
   }
+}
+
+function getLaunchCommand(): string {
+  const configured = vscode.workspace
+    .getConfiguration("deepseekcode")
+    .get<string>("launchCommand");
+  return configured?.trim() || DEFAULT_LAUNCH_COMMAND;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
 }
 
 // ── File Context ────────────────────────────────────────────
@@ -136,7 +160,9 @@ function getActiveFileRef(): string | undefined {
   const editor = vscode.window.activeTextEditor;
   if (!editor) return undefined;
 
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+    editor.document.uri,
+  );
   if (!workspaceFolder) return undefined;
 
   const relativePath = vscode.workspace.asRelativePath(editor.document.uri);
@@ -166,7 +192,7 @@ class SidebarProvider implements vscode.WebviewViewProvider {
       enableScripts: true,
     };
 
-    webviewView.webview.html = getSidebarHtml();
+    webviewView.webview.html = getSidebarHtml(getLaunchCommand());
 
     // Handle button clicks from the webview
     webviewView.webview.onDidReceiveMessage((msg) => {
@@ -182,7 +208,7 @@ class SidebarProvider implements vscode.WebviewViewProvider {
   }
 }
 
-function getSidebarHtml(): string {
+function getSidebarHtml(launchCommand: string): string {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -274,7 +300,7 @@ function getSidebarHtml(): string {
 <body>
   <div class="logo-area">
     <div class="logo">🐋</div>
-    <div class="title">DeepSeek Reasonix</div>
+    <div class="title">DeepSeekCode</div>
     <div class="subtitle">Powered by Prefix Cache</div>
   </div>
 
@@ -294,7 +320,7 @@ function getSidebarHtml(): string {
 
   <div class="tip">
     选中代码后按 <kbd>Ctrl+Alt+K</kbd> 添加文件引用到终端<br/>
-    终端命令：<kbd>deepseekcode</kbd>
+    终端命令：<kbd>${escapeHtml(launchCommand)}</kbd>
   </div>
 
   <script>

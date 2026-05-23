@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="./images/logo.png" width="160" alt="DeepSeek Reasonix" />
+  <img src="./images/logo.png" width="160" alt="DeepSeekCode" />
 </p>
 
-<h1 align="center">DeepSeek Reasonix · VS Code</h1>
+<h1 align="center">DeepSeekCode · VS Code</h1>
 
 <p align="center">
   <b>在 VS Code 里一键启动 Reasonix，自动注入上下文。把 99.82% 缓存命中率的 AI 编码代理嵌入你的编辑器。</b>
@@ -26,13 +26,13 @@
 
 ## 这是什么？
 
-> **DeepSeek Reasonix for VS Code** — 把 Reasonix 的原生 AI 编码能力嵌入 VS Code 终端，并非一个独立 UI 面板，而是和编辑器天然一体的终端工作流。
+> **DeepSeekCode for VS Code** — 把 Reasonix 的原生 AI 编码能力嵌入 VS Code 终端，并非一个独立 UI 面板，而是和编辑器天然一体的终端工作流。
 
 底层引擎是 [esengine/DeepSeek-Reasonix](https://github.com/esengine/DeepSeek-Reasonix) —— 一个围绕 DeepSeek API 前缀缓存优化的 AI 编码代理。它的核心壁垒不是「功能多」，而是**长会话中 Token 成本始终极低**。
 
 真实用户单日数据（2026-05-01）：**4.35 亿输入 token，99.82% 缓存命中**，花费约 $12。同等负载在 v4-flash 上无缓存约 $61。这就是为什么我们选择 Reasonix 作为引擎。
 
-这个 VS Code 插件做的事：**把 Reasonix 终端变成编辑器的一部分**。点击图标，终端自动启动 `deepseekcode`，并把你正在编辑的文件路径（和选中行号）以 `@file#L10-L20` 格式注入进去。不用 cd，不用手动 @引用，打开就能对话。
+这个 VS Code 插件做的事：**把 DeepSeekCode 终端变成编辑器的一部分**。点击图标，终端自动启动 `deepseekcode`，并把你正在编辑的文件路径（和选中行号）以 `@file#L10-L20` 格式注入进去。不用 cd，不用手动 @引用，打开就能对话。
 
 ## 亮点
 
@@ -85,7 +85,7 @@ code --install-extension deepseekcode-*.vsix
 | ⌨ 快捷键 | `Ctrl+Shift+Esc` | 新建一个终端 |
 | ⌨ 快捷键 | `Ctrl+Alt+K` | 注入文件路径到终端 |
 | 📎 编辑器按钮 | 右上角 🐋 按钮 | 新建终端并注入上下文 |
-| ⌨ 命令面板 | `Ctrl+Shift+P` → 搜索 `DeepSeek` | 所有命令入口 |
+| ⌨ 命令面板 | `Ctrl+Shift+P` → 搜索 `DeepSeekCode` | 所有命令入口 |
 
 ## 工作原理
 
@@ -120,14 +120,14 @@ code --install-extension deepseekcode-*.vsix
 - 如果没有打开文件 → 仅启动终端，不注入
 
 **终端管理策略**：
-- 默认模式：查找名为 `DeepSeek` 的终端，存在则复用，不存在则新建
+- 默认模式：查找名为 `DeepSeekCode` 的终端，存在则复用，不存在则新建
 - 新建模式（`Ctrl+Shift+Esc`）：始终创建新终端
 
 ## 完整快捷键
 
 | 快捷键 (Win/Linux) | 快捷键 (Mac) | 命令 | 功能 |
 |---|---|---|---|
-| `Ctrl+Esc` | `Cmd+Esc` | 打开终端 | 聚焦或创建 Reasonix 终端 |
+| `Ctrl+Esc` | `Cmd+Esc` | 打开终端 | 聚焦或创建 DeepSeekCode 终端 |
 | `Ctrl+Shift+Esc` | `Cmd+Shift+Esc` | 新建终端 | 总是创建新终端窗口 |
 | `Ctrl+Alt+K` | `Cmd+Alt+K` | 注入路径 | 把当前文件路径 @引用发送到活跃终端 |
 
@@ -136,7 +136,7 @@ code --install-extension deepseekcode-*.vsix
 插件无需额外配置。安装即可用。
 
 唯一需要的是系统 PATH 中有 `deepseekcode` 命令。除此之外：
-- 终端名称：固定为 `DeepSeek`
+- 终端名称：固定为 `DeepSeekCode`
 - 等待就绪时间：2.5s（后自动注入文件上下文）
 - 启动命令：可自由修改 `deepseekcode` 为其他别名
 
@@ -154,7 +154,7 @@ code --install-extension deepseekcode-*.vsix
 | 编辑器按钮 | ✅ | ❌ | ✅ |
 | 许可证 | MIT | MIT | MIT |
 
-**本插件的定位**：你不是「替换 Reasonix」，而是「让 Reasonix 长在编辑器里」。所有实际的 AI 能力、缓存优化、工具调用都由 Reasonix CLI 完成，插件只做一件事——**消除启动摩擦**。
+**本插件的定位**：你不是「替换 Reasonix」，而是「让 DeepSeekCode 长在编辑器里」。所有实际的 AI 能力、缓存优化、工具调用都由 Reasonix CLI 完成，插件只做一件事——**消除启动摩擦**。
 
 ## 开发
 
@@ -202,13 +202,13 @@ MIT © 2026
 
 ## What is this?
 
-> **DeepSeek Reasonix for VS Code** — launch the Reasonix AI coding agent inside your editor's terminal, with automatic file context injection. No UI panels, no bloat — just the terminal you already know, integrated into your workflow.
+> **DeepSeekCode for VS Code** — launch the DeepSeekCode AI coding agent inside your editor's terminal, with automatic file context injection. No UI panels, no bloat — just the terminal you already know, integrated into your workflow.
 
 Powered by [esengine/DeepSeek-Reasonix](https://github.com/esengine/DeepSeek-Reasonix), the open-source AI coding agent engineered specifically for DeepSeek's prefix-cache architecture. The core value isn't features — it's **extreme cost efficiency across long coding sessions**.
 
 Real-world data from a single user (2026-05-01): **435M input tokens, 99.82% cache hit rate**, ~$12 spent. Equivalent workload on v4-flash without caching: ~$61. That's why we chose Reasonix as the engine.
 
-This VS Code extension does one thing well: it eliminates the friction between your editor and Reasonix. Click the 🐋 icon — your terminal launches, `deepseekcode` runs, and your current file path (with selection line range) is injected as `@file.ts#L10-L20`. No `cd`, no manual `@reference`, just start talking to AI about the code you're looking at.
+This VS Code extension does one thing well: it eliminates the friction between your editor and DeepSeekCode. Click the 🐋 icon — your terminal launches, `deepseekcode` runs, and your current file path (with selection line range) is injected as `@file.ts#L10-L20`. No `cd`, no manual `@reference`, just start talking to AI about the code you're looking at.
 
 ## Highlights
 
@@ -259,7 +259,7 @@ code --install-extension deepseekcode-*.vsix
 | `Ctrl+Shift+Esc` | Keyboard shortcut | New terminal |
 | `Ctrl+Alt+K` | Keyboard shortcut | Inject file reference to active terminal |
 | 📎 Editor button | Click 🐋 in editor toolbar | New terminal with context |
-| Command palette | `Ctrl+Shift+P` → `DeepSeek` | All available commands |
+| Command palette | `Ctrl+Shift+P` → `DeepSeekCode` | All available commands |
 
 ## How it works
 
@@ -295,14 +295,14 @@ code --install-extension deepseekcode-*.vsix
 - No open editor → terminal starts without injection
 
 **Terminal management**:
-- Default mode: Find existing "DeepSeek" terminal → reuse. Create if missing.
+- Default mode: Find existing "DeepSeekCode" terminal → reuse. Create if missing.
 - New mode (`Ctrl+Shift+Esc`): Always create a fresh terminal.
 
 ## All Shortcuts
 
 | Shortcut (Win/Linux) | Shortcut (Mac) | Command | Description |
 |---|---|---|---|
-| `Ctrl+Esc` | `Cmd+Esc` | Open terminal | Focus or create Reasonix terminal |
+| `Ctrl+Esc` | `Cmd+Esc` | Open terminal | Focus or create DeepSeekCode terminal |
 | `Ctrl+Shift+Esc` | `Cmd+Shift+Esc` | New terminal | Always create a new terminal |
 | `Ctrl+Alt+K` | `Cmd+Alt+K` | Inject path | Send current file path to active terminal |
 
@@ -312,7 +312,7 @@ The extension requires zero configuration. Install and go.
 
 The only prerequisite is the `deepseekcode` command on your PATH. Built-in defaults:
 
-- Terminal name: `DeepSeek`
+- Terminal name: `DeepSeekCode`
 - Readiness wait: 2.5 seconds (before injecting file context)
 - Launch command: `deepseekcode`
 
@@ -330,7 +330,7 @@ The only prerequisite is the `deepseekcode` command on your PATH. Built-in defau
 | Editor toolbar button | ✅ | ❌ | ✅ |
 | License | MIT | MIT | MIT |
 
-**Where this fits**: You're not replacing Reasonix — you're making it feel native to your editor. All AI capabilities, cache optimization, and tool execution live in the Reasonix CLI. This extension handles exactly one job: **eliminating launch friction**.
+**Where this fits**: You're not replacing DeepSeekCode — you're making it feel native to your editor. All AI capabilities, cache optimization, and tool execution live in the Reasonix CLI. This extension handles exactly one job: **eliminating launch friction**.
 
 ## Development
 
