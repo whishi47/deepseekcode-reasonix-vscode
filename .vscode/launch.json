@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "调试扩展 (Debug Extension)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/extension.js"
+      ],
+      "preLaunchTask": "构建扩展 (Build Extension)"
+    },
+    {
+      "name": "运行扩展 (Run Extension)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--disableExtensions"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/extension.js"
+      ],
+      "preLaunchTask": "构建扩展 (Build Extension)"
+    }
+  ]
+}
