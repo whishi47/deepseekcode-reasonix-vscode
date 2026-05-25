@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as cp from "child_process";
 
 // ═══════════════════════════════════════════════════════════
 // DeepSeekCode VS Code Extension
@@ -8,6 +9,13 @@ import * as vscode from "vscode";
 
 const TERMINAL_NAME = "DeepSeek";
 const DEFAULT_LAUNCH_COMMAND = "deepseekcode";
+const VERSION_CHECK_COOLDOWN = 6 * 60 * 60 * 1000; // 6 hours
+
+let lastVersionCheck = 0;
+let reasonixVersionCache: { installed: string | null; latest: string | null } = {
+  installed: null,
+  latest: null,
+};
 
 // ── Extension Lifecycle ────────────────────────────────────
 
@@ -47,7 +55,6 @@ export function activate(context: vscode.ExtensionContext) {
 
       const terminal = vscode.window.activeTerminal;
       if (!terminal || terminal.name !== TERMINAL_NAME) {
-        // Try to find any DeepSeek terminal
         const dsTerminal = findTerminal();
         if (dsTerminal) {
           dsTerminal.sendText(fileRef, false);
@@ -65,6 +72,14 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
 
+  // Command 4: Check for and optionally update Reasonix CLI
+  const updateCliCmd = vscode.commands.registerCommand(
+    "deepseekcode.updateCli",
+    async () => {
+      await checkAndUpdateReasonix(true);
+    },
+  );
+
   // Sidebar provider for activity bar icon
   const sidebarProvider = new SidebarProvider();
   const sidebarView = vscode.window.registerWebviewViewProvider(
@@ -76,8 +91,12 @@ export function activate(context: vscode.ExtensionContext) {
     openTerminalCmd,
     openNewTerminalCmd,
     addFileCmd,
+    updateCliCmd,
     sidebarView,
   );
+
+  // Async: check for Reasonix updates (non-blocking)
+  checkAndUpdateReasonix(false);
 }
 
 export function deactivate() {}
@@ -203,12 +222,25 @@ class SidebarProvider implements vscode.WebviewViewProvider {
         case "newTerminal":
           vscode.commands.executeCommand("deepseekcode.openNewTerminal");
           break;
+        case "updateCli":
+          vscode.commands.executeCommand("deepseekcode.updateCli");
+          break;
       }
     });
   }
 }
 
 function getSidebarHtml(launchCommand: string): string {
+  const vInfo = reasonixVersionCache;
+  const versionLine =
+    vInfo.installed
+      ? `Reasonix CLI: ${vInfo.installed}${
+          vInfo.latest && isNewerVersion(vInfo.latest, vInfo.installed)
+            ? ` → ${vInfo.latest} 可用`
+            : ""
+        }`
+      : "Reasonix CLI: 未安装";
+
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -295,6 +327,17 @@ function getSidebarHtml(launchCommand: string): string {
       border-radius: 3px;
       font-size: 10px;
     }
+    .version-info {
+      font-size: 11px;
+      opacity: 0.45;
+      margin-top: 8px;
+      text-align: center;
+      font-family: monospace;
+    }
+    .update-available {
+      color: #ffcc80;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -318,10 +361,25 @@ function getSidebarHtml(launchCommand: string): string {
     <span class="shortcut">Ctrl+Shift+Esc</span>
   </button>
 
+  <button class="btn" onclick="send('updateCli')" style="${
+    vInfo.installed && vInfo.latest && isNewerVersion(vInfo.latest, vInfo.installed)
+      ? "border-color: #ffcc80;"
+      : ""
+  }">
+    <span class="btn-icon">🔄</span>
+    <span>检查更新</span>
+  </button>
+
   <div class="tip">
     选中代码后按 <kbd>Ctrl+Alt+K</kbd> 添加文件引用到终端<br/>
     终端命令：<kbd>${escapeHtml(launchCommand)}</kbd>
   </div>
+
+  <div class="version-info${
+    vInfo.installed && vInfo.latest && isNewerVersion(vInfo.latest, vInfo.installed)
+      ? " update-available"
+      : ""
+  }">${escapeHtml(versionLine)}</div>
 
   <script>
     const vscode = acquireVsCodeApi();
@@ -329,4 +387,121 @@ function getSidebarHtml(launchCommand: string): string {
   </script>
 </body>
 </html>`;
+}
+
+// ── CLI Version Check ───────────────────────────────────────
+
+async function checkAndUpdateReasonix(interactive: boolean) {
+  const now = Date.now();
+  if (!interactive && now - lastVersionCheck < VERSION_CHECK_COOLDOWN) return;
+
+  const autoCheck = vscode.workspace
+    .getConfiguration("deepseekcode")
+    .get<boolean>("autoCheckUpdates", true);
+  if (!interactive && !autoCheck) return;
+
+  lastVersionCheck = now;
+
+  try {
+    const installed = await getInstalledReasonixVersion();
+    const latest = await getLatestReasonixVersion();
+
+    reasonixVersionCache = { installed, latest };
+
+    if (!installed) {
+      if (interactive) {
+        const action = await vscode.window.showWarningMessage(
+          "Reasonix CLI 未安装",
+          "安装",
+        );
+        if (action === "安装") {
+          installReasonix();
+        }
+      }
+      return;
+    }
+
+    if (latest && isNewerVersion(latest, installed)) {
+      const action = await vscode.window.showInformationMessage(
+        `Reasonix 有新版本可用：v${latest}（当前：v${installed}）`,
+        "立即更新",
+      );
+      if (action === "立即更新") {
+        updateReasonix(latest);
+      }
+    } else if (interactive) {
+      vscode.window.showInformationMessage(
+        `Reasonix CLI 已是最新版本（v${installed}）`,
+      );
+    }
+  } catch {
+    if (interactive) {
+      vscode.window.showErrorMessage("检查 Reasonix 更新失败，请检查网络连接。");
+    }
+  }
+}
+
+function getInstalledReasonixVersion(): Promise<string | null> {
+  return new Promise((resolve) => {
+    cp.exec(
+      'npm list -g reasonix --depth=0 --json',
+      { timeout: 15000 },
+      (err, stdout) => {
+        if (err) {
+          resolve(null);
+          return;
+        }
+        try {
+          const parsed = JSON.parse(stdout);
+          const version = parsed?.dependencies?.reasonix?.version;
+          resolve(version || null);
+        } catch {
+          resolve(null);
+        }
+      },
+    );
+  });
+}
+
+function getLatestReasonixVersion(): Promise<string | null> {
+  return new Promise((resolve) => {
+    cp.exec(
+      'npm view reasonix version',
+      { timeout: 15000 },
+      (err, stdout) => {
+        if (err) {
+          resolve(null);
+          return;
+        }
+        const version = stdout.trim();
+        resolve(/^\d+\.\d+\.\d+/.test(version) ? version : null);
+      },
+    );
+  });
+}
+
+function isNewerVersion(latest: string, current: string): boolean {
+  const parse = (v: string) => v.replace(/^v/, "").split(".").map(Number);
+  const [lMajor, lMinor, lPatch] = parse(latest);
+  const [cMajor, cMinor, cPatch] = parse(current);
+
+  if (lMajor !== cMajor) return lMajor > cMajor;
+  if (lMinor !== cMinor) return lMinor > cMinor;
+  return lPatch > cPatch;
+}
+
+function installReasonix() {
+  const terminal = vscode.window.createTerminal({
+    name: "Reasonix Install",
+  });
+  terminal.show();
+  terminal.sendText("npm install -g reasonix");
+}
+
+function updateReasonix(version: string) {
+  const terminal = vscode.window.createTerminal({
+    name: "Reasonix Update",
+  });
+  terminal.show();
+  terminal.sendText(`npm install -g reasonix@${version}`);
 }

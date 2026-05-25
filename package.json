@@ -44,6 +44,10 @@
       {
         "command": "deepseekcode.addFileToTerminal",
         "title": "DeepSeekCode: 添加文件引用到终端"
+      },
+      {
+        "command": "deepseekcode.updateCli",
+        "title": "DeepSeekCode: 更新 Reasonix CLI"
       }
     ],
     "configuration": {
@@ -53,6 +57,17 @@
           "type": "string",
           "default": "deepseekcode",
           "description": "Command sent to the VS Code terminal when DeepSeekCode starts."
+        },
+        "deepseekcode.autoCheckUpdates": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically check for Reasonix CLI updates on startup."
+        },
+        "deepseekcode.updateChannel": {
+          "type": "string",
+          "default": "latest",
+          "enum": ["latest", "beta", "stable"],
+          "description": "Update channel for Reasonix CLI."
         }
       }
     },
